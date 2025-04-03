@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Estimator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #87CEEB;  /* Sky Blue */
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --dark-color: #1a1a1a;
+            --light-color: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Road Animation */
+        .road-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #ffffff 100%);
+        }
+
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 200px;
+            background: var(--dark-color);
+            animation: roadMove 20s linear infinite;
+        }
+
+        .road::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--light-color) 0,
+                var(--light-color) 50px,
+                transparent 50px,
+                transparent 100px
+            );
+            animation: roadLineMove 1s linear infinite;
+        }
+
+        .car {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 80px;
+            background: var(--dark-color);
+            border-radius: 20px;
+            animation: carBounce 1s ease-in-out infinite;
+        }
+
+        .car::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            width: 40px;
+            height: 30px;
+            background: var(--dark-color);
+            border-radius: 10px;
+        }
+
+        .car::after {
+            content: '🚗';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        .wheel {
+            position: absolute;
+            bottom: -15px;
+            width: 30px;
+            height: 30px;
+            background: var(--light-color);
+            border: 3px solid var(--dark-color);
+            border-radius: 50%;
+            animation: wheelRotate 1s linear infinite;
+        }
+
+        .wheel.left {
+            left: 20px;
+        }
+
+        .wheel.right {
+            right: 20px;
+        }
+
+        @keyframes roadMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes roadLineMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100px); }
+        }
+
+        @keyframes carBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        @keyframes wheelRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Cloud Animation */
+        .clouds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            animation: cloudMove 20s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .cloud:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            width: 100px;
+            height: 50px;
+            animation-delay: 0s;
+        }
+
+        .cloud:nth-child(2) {
+            top: 40%;
+            left: 50%;
+            width: 150px;
+            height: 75px;
+            animation-delay: -5s;
+        }
+
+        .cloud:nth-child(3) {
+            top: 30%;
+            left: 80%;
+            width: 80px;
+            height: 40px;
+            animation-delay: -10s;
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100px); }
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(135, 206, 235, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid rgba(135, 206, 235, 0.3);
+            padding: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+            background: white;
+        }
+
+        .btn-primary {
+            background-color: var(--dark-color);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .prediction-result {
+            background: linear-gradient(135deg, var(--dark-color) 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid rgba(135, 206, 235, 0.3);
+            border-top: 4px solid var(--dark-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .card-title {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group-text {
+            background-color: var(--dark-color);
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="road-container">
+        <div class="clouds">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+        </div>
+        <div class="road"></div>
+        <div class="car">
+            <div class="wheel left"></div>
+            <div class="wheel right"></div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg p-4 animate__animated animate__fadeIn">
+                    <h2 class="text-center card-title">🚗 Car Selling Price Estimator</h2>
+                    <form id="predictionForm" action="/predict" method="post" class="mt-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Year:</label>
+                                <div class="input-group">
+                                    <input type="number" name="year" class="form-control" required min="2000" max="2024">
+                                    <span class="input-group-text">📅</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Present Price (Lakhs):</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" name="present_price" class="form-control" required>
+                                    <span class="input-group-text">₹</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kms Driven:</label>
+                                <div class="input-group">
+                                    <input type="number" name="kms_driven" class="form-control" required>
+                                    <span class="input-group-text">🚘</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Previous Owners:</label>
+                                <div class="input-group">
+                                    <input type="number" name="owner" class="form-control" required min="0" max="3">
+                                    <span class="input-group-text">👥</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fuel Type:</label>
+                                <select name="fuel_type_petrol" class="form-select" required>
+                                    <option value="1">Petrol ⛽</option>
+                                    <option value="0">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Is Diesel?:</label>
+                                <select name="fuel_type_diesel" class="form-select" required>
+                                    <option value="1">Yes ⛽</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Seller Type:</label>
+                                <select name="seller_type" class="form-select" required>
+                                    <option value="1">Dealer 🏢</option>
+                                    <option value="0">Individual 👤</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Transmission:</label>
+                                <select name="transmission" class="form-select" required>
+                                    <option value="1">Manual 🚗</option>
+                                    <option value="0">Automatic 🤖</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Predict Price
+                        </button>
+                    </form>
+
+                    <div class="loading-spinner"></div>
+
+                    {% if prediction_text %}
+                        <div class="prediction-result animate__animated animate__fadeIn">
+                            <h3 class="text-center mb-0">{{ prediction_text }}</h3>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            const submitButton = this.querySelector('button[type="submit"]');
+            const spinner = submitButton.querySelector('.spinner-border');
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            
+            submitButton.disabled = true;
+            spinner.classList.remove('d-none');
+            loadingSpinner.style.display = 'block';
+        });
+
+        function showToast(message, type = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+    </script>
+</body>
+</html> 
